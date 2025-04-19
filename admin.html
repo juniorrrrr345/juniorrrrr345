@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - SOUS GROS J 2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-4 min-h-screen">
+
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-3xl font-bold text-pink-500 mb-6">Panel Admin</h1>
+
+    <!-- Formulaire d'ajout -->
+    <form id="add-form" class="space-y-3 mb-6">
+      <input type="text" id="name" placeholder="Nom du produit" class="w-full p-2 rounded bg-gray-800 text-white">
+      <input type="text" id="description" placeholder="Description" class="w-full p-2 rounded bg-gray-800 text-white">
+      <input type="number" id="price" placeholder="Prix" class="w-full p-2 rounded bg-gray-800 text-white">
+      <button type="submit" class="bg-pink-600 hover:bg-pink-700 w-full py-2 rounded font-bold">Ajouter</button>
+    </form>
+
+    <div id="product-list" class="space-y-4">
+      <!-- Produits affichés ici -->
+    </div>
+  </div>
+
+  <script>
+    const apiUrl = "/api/products";
+
+    // Récupérer et afficher les produits
+    function loadProducts() {
+      fetch(apiUrl)
+        .then(res => res.json())
+        .then(products => {
+          const list = document.getElementById("product-list");
+          list.innerHTML = "";
+          products.forEach(product => {
+            const div = document.createElement("div");
+            div.className = "bg-gray-800 p-4 rounded-lg";
+            div.innerHTML = `
+              <h2 class="text-lg font-semibold">${product.name}</h2>
+              <p class="text-sm text-gray-400">${product.description}</p>
+              <p class="text-pink-400 font-bold">${product.price}€</p>
+              <button onclick="deleteProduct(${product.id})" class="mt-2 text-sm bg-red-500 hover:bg-red-600 px-3 py-1 rounded">Supprimer</button>
+            `;
+            list.appendChild(div);
+          });
+        });
+    }
+
+    // Ajouter un produit
+    document.getElementById("add-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const description = document.getElementById("description").value;
+      const price = document.getElementById("price").value;
+
+      fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description, price })
+      }).then(() => {
+        loadProducts();
+        document.getElementById("add-form").reset();
+      });
+    });
+
+    // Supprimer produit
+    function deleteProduct(id) {
+      fetch(apiUrl + "/" + id, { method: "DELETE" }).then(() => {
+        loadProducts();
+      });
+    }
+
+    // Charger les produits dès le début
+    loadProducts();
+  </script>
+
+</body>
+</html>
